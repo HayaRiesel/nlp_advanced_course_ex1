@@ -5,7 +5,7 @@ import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments, set_seed, \
     DataCollatorWithPadding, pipeline
-import wandb
+# import wandb
 import evaluate
 
 def fine_tune_model(model_name, num_seeds, num_train_samples, num_val_samples):
@@ -30,7 +30,7 @@ def fine_tune_model(model_name, num_seeds, num_train_samples, num_val_samples):
     training_args = TrainingArguments(
         output_dir="results",
         logging_dir="logs",
-        report_to="wandb",
+        # report_to="wandb",
         save_strategy="epoch",
         save_total_limit=1,
         logging_steps=1000,
@@ -44,7 +44,7 @@ def fine_tune_model(model_name, num_seeds, num_train_samples, num_val_samples):
     for seed in range(num_seeds):
         set_seed(seed)
 
-        run = wandb.init(project="ex1", config={"model": model_name, "seed": seed})
+        # run = wandb.init(project="ex1", config={"model": model_name, "seed": seed})
         metric = evaluate.load("accuracy")
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
@@ -65,6 +65,7 @@ def fine_tune_model(model_name, num_seeds, num_train_samples, num_val_samples):
         train_runtime += train_result.metrics['train_runtime']
 
         #evaluation the model
+        model.eval()
         eval_results = trainer.evaluate()
         eval_runtime += eval_results['eval_runtime']
 
@@ -77,7 +78,7 @@ def fine_tune_model(model_name, num_seeds, num_train_samples, num_val_samples):
         path_save = f"{model_name}_seed_{seed}"
         trainer.save_model(path_save)
 
-        run.finish()
+        # run.finish()
 
     # compute mean and standard
     mean_accuracy = torch.tensor(accuracies).mean().item()
